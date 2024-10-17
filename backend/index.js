@@ -1,51 +1,32 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from 'cors';
-import mongoose from "mongoose";
-import authRoutes from './routes/auth.js';
+import cors from "cors";
 
+import connectMongoDB from "./db/connectMongoDB.js"; // Connect MongoDB
+import authRoutes from "./routes/auth.routes.js"; // Importing auth routes
+
+// Initialize dotenv for environment variables
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
+// Middleware for JSON parsing
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); //Middleware to parse from data(urlencodded)
 
-// Allow requests from your frontend origin
+// CORS setup to allow frontend requests
 const corsOptions = {
-    origin: 'http://localhost:5173', // Replace this with your frontend's address
-    credentials: true, // Allow cookies to be sent
+  origin: "http://localhost:5173", // Replace with your frontend's actual origin
+  credentials: true, // Allow cookies to be sent
 };
-
 app.use(cors(corsOptions));
-// app.use(cors());
-// app.use(
-//     cors({
-//         origin: 'http://localhost:5173',
-//         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//         allowedHeaders: ['Content-Type'],
-//     })
-// );
 
 // Routes
-app.use('/auth', authRoutes);
+app.use("/api/auth", authRoutes); // Auth routes for login/logout
 
-
-// app.get('/dashboard', (req, res)=>{
-//     res.send("hello")
-// })
-// Database Connection
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log('App connected to database');
-        app.listen(PORT, () => {
-            console.log(`App is listening to port: ${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.log(error);
-    });
-
-
-
+// Database connection and server startup
+app.listen(PORT, () => {
+  console.log(`Server started on port ${PORT}`);
+  connectMongoDB(); // Connect to MongoDB
+});
